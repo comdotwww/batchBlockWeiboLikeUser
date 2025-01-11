@@ -2,7 +2,7 @@
 // @name         批量拉黑微博点赞用户 解除拉黑
 // @namespace    https://github.com/comdotwww/batchBlockWeiboLikeUser
 // @version      1.0
-// @description  批量拉黑微博点赞用户 解除拉黑
+// @description  用于批量拉黑微博点赞用户 解除拉黑
 // @author       comdotwww
 // @match        *://service.account.weibo.com/reportspam*
 // @grant        GM_xmlhttpRequest
