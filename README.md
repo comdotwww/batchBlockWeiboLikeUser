@@ -8,7 +8,7 @@
 # 使用
 对具体评论，点击“投诉”按钮，在新打开的页面操作。
 ![点击“投诉”按钮](https://github.com/user-attachments/assets/ec994373-221d-414b-bc75-3f7f4079cc83)
-![c](h操作tps://github.com/user-attachments/assets/c8cd384c-98aa-4f7d-bbc8-f4467ddac9a7)
+![具体操作](https://github.com/user-attachments/assets/c8cd384c-98aa-4f7d-bbc8-f4467ddac9a7)
 
 # 首次使用需要授权
 ![image](https://github.com/user-attachments/assets/5d9afd5a-f4d5-47f7-9089-699938318b73)
