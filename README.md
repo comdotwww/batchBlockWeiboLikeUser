@@ -11,7 +11,8 @@
 ![具体操作](https://github.com/user-attachments/assets/c8cd384c-98aa-4f7d-bbc8-f4467ddac9a7)
 
 # 首次使用需要授权
-![image](https://github.com/user-attachments/assets/5d9afd5a-f4d5-47f7-9089-699938318b73)
+![image](https://github.com/user-attachments/assets/70b6c080-05df-437c-9ceb-296533a86e1c)
+
 
 # 提问
 有疑问请在 [issue](https://github.com/comdotwww/batchBlockWeiboLikeUser/issues) 里提问。
