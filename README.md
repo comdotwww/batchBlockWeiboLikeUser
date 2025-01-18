@@ -12,6 +12,9 @@
 
 # 首次使用需要授权
 ![image](https://github.com/user-attachments/assets/70b6c080-05df-437c-9ceb-296533a86e1c)
+成功授权后：
+![image](https://github.com/user-attachments/assets/da5338ff-ec97-4e9a-875b-e482dc07a491)
+
 
 
 # 提问
