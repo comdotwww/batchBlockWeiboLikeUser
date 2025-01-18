@@ -21,7 +21,7 @@
     // 等待页面加载完成
     window.addEventListener('load', async function() {
         // 获取report元素
-        const reportElement = document.querySelector('a.mod-btn');
+        const reportElement = document.querySelector('a.mod-btn') || document.querySelector('dl dd p.module-infobox').parentNode;
         if (!reportElement) {
             console.log('未找到report元素');
             return;
@@ -46,6 +46,9 @@
          * @returns
          */
         async function getLikePage(actionData, page = 1) {
+            if (!actionData) {
+                return {}
+            }
             let uidArray = [0, []]
             return new Promise(function(resolve, reject) {
                 let rnd = Math.floor(Math.random() * 1e4 + 1.5788995e12);
@@ -60,7 +63,7 @@
                         if (res.status === 200) {
                             const json = JSON.parse(res.responseText);
                             uidArray = [json.data.page.totalpage, Array.from(json.data.html.matchAll(/uid=['"](.+?)['"]/ig))
-                                .map(x => x[1])
+                                .map(x => x[1]), json.data.like_counts
                             ]
                         } else {
                             alert(res.statusText);
@@ -201,6 +204,10 @@
          * @param {Array} actionData
          */
         async function blockAll(actionData) {
+            if (confirm('确认拉黑该微博/该评论所有点赞用户吗？') == false || !actionData) {
+                return;
+            }
+
             const link = this
             link.onclick = undefined
 
@@ -261,6 +268,10 @@
          * @param {Array} actionData
          */
         async function unblockAll(actionData) {
+            if (confirm('确认取消拉黑该微博/该评论所有点赞用户吗？') == false || !actionData) {
+                return;
+            }
+
             const link = this
             link.onclick = undefined
 
@@ -313,6 +324,15 @@
 
         }
 
+        // 获取hid元素
+        const hidElement = document.getElementById('extra_data');
+        if (!hidElement) {
+            console.log('未找到extra_data元素');
+            return;
+        }
+        // 解析hid元素中的value参数
+        const params = new URLSearchParams(hidElement.value);
+
         // 当前用户黑名单信息
         const userBlockListInfo = document.createElement('div');
         userBlockListInfo.classList.add('mod-txt');
@@ -330,9 +350,22 @@
         blockCommentUserButton.style.cursor = 'pointer';
         blockCommentUserButton.style.marginTop = '10px'; // 设置容器与上方元素的间距
 
+        // 创建“取消拉黑评论用户”按钮
+        const unblockCommentUserButton = document.createElement('button');
+        unblockCommentUserButton.textContent = '取消拉黑该用户';
+        unblockCommentUserButton.style.marginLeft = '10px';
+        unblockCommentUserButton.style.padding = '5px 10px';
+        unblockCommentUserButton.style.backgroundColor = '#228B22';
+        unblockCommentUserButton.style.color = '#fff';
+        unblockCommentUserButton.style.border = 'none';
+        unblockCommentUserButton.style.borderRadius = '4px';
+        unblockCommentUserButton.style.cursor = 'pointer';
+        unblockCommentUserButton.style.marginTop = '10px'; // 设置容器与上方元素的间距
+
         // 创建“拉黑点赞用户”按钮
         const blockLikeUserButton = document.createElement('button');
-        blockLikeUserButton.textContent = '拉黑点赞用户';
+        const firstLikePage = await getLikePage(params.get('rid'), 1);
+        blockLikeUserButton.textContent = `拉黑点赞用户：共 ${firstLikePage[2]||0} 位`;
         blockLikeUserButton.style.marginLeft = '10px';
         blockLikeUserButton.style.padding = '5px 10px';
         blockLikeUserButton.style.backgroundColor = '#ff4d4f';
@@ -344,7 +377,7 @@
 
         // 创建“解除拉黑点赞用户”按钮
         const unblockLikeUserButton = document.createElement('button');
-        unblockLikeUserButton.textContent = '解除拉黑点赞用户';
+        unblockLikeUserButton.textContent = `解除拉黑点赞用户：共 ${firstLikePage[2]||0} 位`;
         unblockLikeUserButton.style.marginLeft = '10px';
         unblockLikeUserButton.style.padding = '5px 10px';
         unblockLikeUserButton.style.backgroundColor = '#228B22';
@@ -354,15 +387,37 @@
         unblockLikeUserButton.style.cursor = 'pointer';
         unblockLikeUserButton.style.marginTop = '10px'; // 设置容器与上方元素的间距
 
+        // 拉黑提提示信息
         const blockInfo = document.createElement('div')
         blockInfo.innerHTML = '<div class="mod-txt" style="margin-top: 10px;">屏蔽拉黑用户，目前非会员用户可以屏蔽或拉黑5000个微博用户，会员用户屏蔽上限如下（更新时间：2024年3月5日），信息来源：<a href="https://kefu.weibo.com/faqdetail?id=18937" target="_blank">微博客服</a><br><img src="https://cs.s.weibo.com/knowledge/atts/21a423806fbb28f99f818acd6f0da0bf.jpg"></div>'
 
+        reportElement.parentNode.style.flexDirection = 'column'; // 垂直排列
+
         // 将按钮插入到report元素后面
         reportElement.parentNode.insertBefore(userBlockListInfo, reportElement.nextSibling);
-        reportElement.parentNode.insertBefore(blockCommentUserButton, userBlockListInfo.nextSibling);
-        reportElement.parentNode.insertBefore(blockLikeUserButton, blockCommentUserButton.nextSibling);
-        reportElement.parentNode.insertBefore(unblockLikeUserButton, blockLikeUserButton.nextSibling);
-        reportElement.parentNode.insertBefore(blockInfo, unblockLikeUserButton.nextSibling);
+        // 换行
+        const br0 = document.createElement('div')
+        br0.innerHTML = ''
+        reportElement.parentNode.insertBefore(br0, userBlockListInfo.nextSibling);
+        reportElement.parentNode.insertBefore(blockCommentUserButton, br0.nextSibling);
+
+        const br1 = document.createElement('div')
+        br1.innerHTML = ''
+        reportElement.parentNode.insertBefore(br1, blockCommentUserButton.nextSibling);
+        reportElement.parentNode.insertBefore(unblockCommentUserButton, br1.nextSibling);
+
+        const br2 = document.createElement('div')
+        br2.innerHTML = ''
+        reportElement.parentNode.insertBefore(br2, unblockCommentUserButton.nextSibling);
+        reportElement.parentNode.insertBefore(blockLikeUserButton, br2.nextSibling);
+        const br3 = document.createElement('div')
+        br3.innerHTML = ''
+        reportElement.parentNode.insertBefore(br3, blockLikeUserButton.nextSibling);
+        reportElement.parentNode.insertBefore(unblockLikeUserButton, br3.nextSibling);
+        const br4 = document.createElement('div')
+        br4.innerHTML = ''
+        reportElement.parentNode.insertBefore(br4, unblockLikeUserButton.nextSibling);
+        reportElement.parentNode.insertBefore(blockInfo, br4.nextSibling);
 
         const userBlockData = await getUserBlockListInfo();
         if (userBlockData && userBlockData.total) {
@@ -382,41 +437,35 @@
             }
         }
 
-        // 获取hid元素
-        const hidElement = document.getElementById('extra_data');
-        if (!hidElement) {
-            console.log('未找到extra_data元素');
-            return;
-        }
-
-        // 解析hid元素中的value参数
-        const params = new URLSearchParams(hidElement.value);
-
         // 为“拉黑评论用户”按钮添加点击事件
         blockCommentUserButton.onclick = async function() {
             const rUid = params.get('r_uid');
             if (rUid) {
-                alert(`拉黑评论用户：uid = ${rUid}`);
-                // 在这里添加拉黑评论用户的逻辑
-                const data = await blockUser(rUid)
-                if (data.ok != 1) {
-                    alert('拉黑失败，请重试。');
-                } else {
-                    this.onclick = undefined
-                    this.innerText = '已拉黑 ' + data.card.title_sub
-                    this.style.color = '#CCC'
-                    if (data.card.pic) {
-                        this.style.display = 'flex';
-                        this.style.alignItems = 'center'; // 使文字和图片垂直居中
-                        // 创建图片元素
-                        const image = document.createElement('img');
-                        image.src = data.card.pic;
-                        image.style.width = '16px'; // 设置图片宽度
-                        image.style.height = '16px'; // 设置图片高度
-                        image.style.marginLeft = '5px'; // 设置图片与文字的间距
+                // 当前用户昵称
+                const n = document.querySelector('.mod-user .m-box .mod-text-box p a') || document.querySelector('dl dd p.module-infobox a')
+                const nickname = n ? n.innerText : ''
+                if (confirm(`确认拉黑该微博/该评论用户：${nickname} 吗？`) == true) {
+                    // 在这里添加拉黑评论用户的逻辑
+                    const data = await blockUser(rUid)
+                    if (data.ok != 1) {
+                        alert('拉黑失败，请重试。');
+                    } else {
+                        this.onclick = undefined
+                        this.innerText = '已拉黑 ' + data.card.title_sub
+                        this.style.color = '#CCC'
+                        if (data.card.pic) {
+                            this.style.display = 'flex';
+                            this.style.alignItems = 'center'; // 使文字和图片垂直居中
+                            // 创建图片元素
+                            const image = document.createElement('img');
+                            image.src = data.card.pic;
+                            image.style.width = '16px'; // 设置图片宽度
+                            image.style.height = '16px'; // 设置图片高度
+                            image.style.marginLeft = '5px'; // 设置图片与文字的间距
 
-                        // 将图片插入到按钮中
-                        this.appendChild(image);
+                            // 将图片插入到按钮中
+                            this.appendChild(image);
+                        }
                     }
                 }
             } else {
@@ -424,9 +473,51 @@
             }
         };
 
-        // 为“拉黑点赞用户”按钮添加点击事件
-        blockLikeUserButton.onclick = blockAll.bind(blockLikeUserButton, params.get('rid'));
-        // 为“取消拉黑点赞用户”按钮添加点击事件
-        unblockLikeUserButton.onclick = unblockAll.bind(unblockLikeUserButton, params.get('rid'));
+        // 为“取消拉黑评论用户”按钮添加点击事件
+        unblockCommentUserButton.onclick = async function() {
+            const rUid = params.get('r_uid');
+            if (rUid) {
+                // 当前用户昵称
+                const n = document.querySelector('.mod-user .m-box .mod-text-box p a') || document.querySelector('dl dd p.module-infobox a')
+                const nickname = n ? n.innerText : ''
+                if (confirm(`确认取消拉黑该微博/该评论用户：${nickname} 吗？`) == true) {
+                    // 在这里添加拉黑评论用户的逻辑
+                    const data = await unblockUser(rUid)
+                    if (data.ok != 1) {
+                        alert('取消拉黑失败，请重试。');
+                    } else {
+                        this.onclick = undefined
+                        this.innerText = '已取消拉黑 ' + data.card.title_sub
+                        this.style.color = '#CCC'
+                        if (data.card.pic) {
+                            this.style.display = 'flex';
+                            this.style.alignItems = 'center'; // 使文字和图片垂直居中
+                            // 创建图片元素
+                            const image = document.createElement('img');
+                            image.src = data.card.pic;
+                            image.style.width = '16px'; // 设置图片宽度
+                            image.style.height = '16px'; // 设置图片高度
+                            image.style.marginLeft = '5px'; // 设置图片与文字的间距
+
+                            // 将图片插入到按钮中
+                            this.appendChild(image);
+                        }
+                    }
+                }
+            } else {
+                alert('未找到用户id参数');
+            }
+        };
+
+        if ((firstLikePage[2] || 0) == 0) {
+            blockLikeUserButton.onclick = undefined
+            unblockLikeUserButton.onclick = undefined
+        } else {
+            // 为“拉黑点赞用户”按钮添加点击事件
+            blockLikeUserButton.onclick = blockAll.bind(blockLikeUserButton, params.get('rid'));
+            // 为“取消拉黑点赞用户”按钮添加点击事件
+            unblockLikeUserButton.onclick = unblockAll.bind(unblockLikeUserButton, params.get('rid'));
+        }
+
     });
 })();
