@@ -16,3 +16,8 @@
 
 # 提问
 有疑问请在 [issue](https://github.com/comdotwww/batchBlockWeiboLikeUser/issues) 里提问。
+
+# 版本日志
+- V1.2 存储已拉黑、解除拉黑成功用户信息，支持用户分页查看用户头像、昵称，支持用户点击跳转用户详情页面 todo
+- V1.1 拉黑、解除拉黑时显示用户名和头像 done
+- V1.0 初始版提交 done
