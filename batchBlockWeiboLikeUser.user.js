@@ -4,7 +4,7 @@
 // @version      1.1
 // @description  用于批量拉黑微博点赞用户 解除拉黑
 // @author       comdotwww
-// @match        *://service.account.weibo.com/reportspam*
+// @match        http*://service.account.weibo.com/reportspam*
 // @grant        GM_xmlhttpRequest
 // @run-at       document-end
 // @license           GPL-3.0
@@ -19,7 +19,7 @@
     'use strict';
 
     // 等待页面加载完成
-    window.addEventListener('load', function() {
+    window.addEventListener('load', async function() {
         // 获取report元素
         const reportElement = document.querySelector('a.mod-btn');
         if (!reportElement) {
@@ -113,7 +113,7 @@
                     method: 'POST',
                     url: 'https://weibo.com/ajax/statuses/filterUser',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json; charset=utf-8',
                         'referer': `https://weibo.com/u/${uid}`,
                         'origin': 'https://weibo.com',
                     },
@@ -139,11 +139,55 @@
                     method: 'POST',
                     url: 'https://weibo.com/ajax/statuses/deleteFilters',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json; charset=utf-8',
                         'referer': `https://weibo.com/u/${uid}`,
                         'origin': 'https://weibo.com',
                     },
                     data: JSON.stringify({ "uid": uid, "__rnd": rnd }),
+                    onload(res) {
+                        resolve(JSON.parse(res.responseText));
+                    }
+                });
+            });
+        }
+
+        /**
+         * 获取用户黑名单信息
+         *
+         * @returns
+         */
+        async function getUserBlockListInfo() {
+            return new Promise(function(resolve, reject) {
+                GM_xmlhttpRequest({
+                    method: 'GET',
+                    url: 'https://weibo.com/ajax/setting/getFilteredUsers?page=1&__rnd=' + Math.floor(Math.random() * 1e4 + 1.5788995e12),
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'referer': 'https://weibo.com/set/shield?type=user',
+                        'origin': 'https://weibo.com',
+                    },
+                    onload(res) {
+                        resolve(JSON.parse(res.responseText));
+                    }
+                });
+            });
+        }
+
+        /**
+         * 获取用户VIP信息
+         *
+         * @returns
+         */
+        async function getUserInfo() {
+            return new Promise(function(resolve, reject) {
+                GM_xmlhttpRequest({
+                    method: 'GET',
+                    url: 'https://new.vip.weibo.cn/aj/vipcenter/home?F=vipcenter_jump&from=&lang=zh_CN',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'referer': 'https://new.vip.weibo.cn/vipcenter?portrait_only=1&topnavstyle=1&immersiveScroll=100&F=vipcenter_jump',
+                        'origin': 'https://new.vip.weibo.cn',
+                    },
                     onload(res) {
                         resolve(JSON.parse(res.responseText));
                     }
@@ -269,6 +313,11 @@
 
         }
 
+        // 当前用户黑名单信息
+        const userBlockListInfo = document.createElement('div');
+        userBlockListInfo.classList.add('mod-txt');
+        userBlockListInfo.textContent = '';
+
         // 创建“拉黑评论用户”按钮
         const blockCommentUserButton = document.createElement('button');
         blockCommentUserButton.textContent = '拉黑该用户';
@@ -305,10 +354,33 @@
         unblockLikeUserButton.style.cursor = 'pointer';
         unblockLikeUserButton.style.marginTop = '10px'; // 设置容器与上方元素的间距
 
+        const blockInfo = document.createElement('div')
+        blockInfo.innerHTML = '<div class="mod-txt" style="margin-top: 10px;">屏蔽拉黑用户，目前非会员用户可以屏蔽或拉黑5000个微博用户，会员用户屏蔽上限如下（更新时间：2024年3月5日），信息来源：<a href="https://kefu.weibo.com/faqdetail?id=18937" target="_blank">微博客服</a><br><img src="https://cs.s.weibo.com/knowledge/atts/21a423806fbb28f99f818acd6f0da0bf.jpg"></div>'
+
         // 将按钮插入到report元素后面
-        reportElement.parentNode.insertBefore(blockCommentUserButton, reportElement.nextSibling);
+        reportElement.parentNode.insertBefore(userBlockListInfo, reportElement.nextSibling);
+        reportElement.parentNode.insertBefore(blockCommentUserButton, userBlockListInfo.nextSibling);
         reportElement.parentNode.insertBefore(blockLikeUserButton, blockCommentUserButton.nextSibling);
         reportElement.parentNode.insertBefore(unblockLikeUserButton, blockLikeUserButton.nextSibling);
+        reportElement.parentNode.insertBefore(blockInfo, unblockLikeUserButton.nextSibling);
+
+        const userBlockData = await getUserBlockListInfo();
+        if (userBlockData && userBlockData.total) {
+            userBlockListInfo.textContent = `当前用户黑名单人数: ${userBlockData.total} 人, 用户VIP信息: `;
+            const userVipData = await getUserInfo();
+            if (userVipData && userVipData.data.baseInfo.user_info.gif_icon) {
+                // 创建图片元素
+                const image = document.createElement('img');
+                image.src = userVipData.data.baseInfo.user_info.gif_icon
+                image.style.width = '50px'; // 设置图片宽度
+                image.style.height = '25px'; // 设置图片高度
+
+                // 将图片插入到按钮中
+                userBlockListInfo.appendChild(image);
+            } else {
+                userBlockListInfo.textContent = `当前用户黑名单人数: ${userBlockData.total} 人, 用户VIP信息: 无`;
+            }
+        }
 
         // 获取hid元素
         const hidElement = document.getElementById('extra_data');
@@ -338,7 +410,7 @@
                         this.style.alignItems = 'center'; // 使文字和图片垂直居中
                         // 创建图片元素
                         const image = document.createElement('img');
-                        image.src = data.card.pic; // 替换为你的图片URL
+                        image.src = data.card.pic;
                         image.style.width = '16px'; // 设置图片宽度
                         image.style.height = '16px'; // 设置图片高度
                         image.style.marginLeft = '5px'; // 设置图片与文字的间距
