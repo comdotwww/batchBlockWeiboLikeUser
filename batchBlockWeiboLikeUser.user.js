@@ -8,10 +8,11 @@
 // @grant        GM_xmlhttpRequest
 // @run-at       document-end
 // @license           GPL-3.0
-// @updateURL         https://cdn.jsdelivr.net/gh/comdotwww/batchBlockWeiboLikeUser@latest/batchBlockWeiboLikeUser.user.js
-// @downloadURL       https://cdn.jsdelivr.net/gh/comdotwww/batchBlockWeiboLikeUser@latest/batchBlockWeiboLikeUser.user.js
+// @icon         data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADAAMAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/APXqKKZJKkMZdzhR7Z//AF10nYPrLn1Z4pJSluGhhcI7l8HJ9BTZ9dSJ9qQl/q4H8s1nWl9ardNPd2paVnLeaDu2+nHtj3NOzK5XudPSUyKWOeMSRuHQ9CDT6RItYeoXD39/HZWsgII5YdAec5+gH6+9blc9p5ZLmVbdU+1Q2rqA448wNxnp7VFSTjFtFI2bfSLKCML5CSN3eRQxP59KZc6LZTqQsQhbs0fGPw6Vj+Fb/wAWXd1cr4jsdPtoQoMJtXyxOec/O3bHpUHiLU/GdrrsUOiaXY3GnEKXlmcBhk/MPvj65xXnqUk99R38izpztpupS2s7qqngknAz1B/Ef09K6Cuf1PyTrcjSKrgR8KRncxTAH5kVvqNqBSc4GMnvXowk5JNiluOqtdW7SvHNC4S4iJ2EjIIPUH2NWajlEhiYRMFcj5SRkA02rqzJKn9rWs3mWsjSw3A4YRAsc/7JAOaZLr1rAEijWWV8hAWG0Z/2ien5VNpVgmnxPuIeVzkvjt6U3VdMi1EAgiOToWxnIrkVBc9raF3Q2zsGSeS7uyj3DnPA4X6fp+VX6it43it0jkk8x1GC2MZqWu1KxJ//2Q==
 // @homepageURL       https://github.com/comdotwww/batchBlockWeiboLikeUser
 // @supportURL        https://github.com/comdotwww/batchBlockWeiboLikeUser/issues
+// @downloadURL https://update.greasyfork.org/scripts/523473/%E6%89%B9%E9%87%8F%E6%8B%89%E9%BB%91%E5%BE%AE%E5%8D%9A%E7%82%B9%E8%B5%9E%E7%94%A8%E6%88%B7%20%E8%A7%A3%E9%99%A4%E6%8B%89%E9%BB%91.user.js
+// @updateURL https://update.greasyfork.org/scripts/523473/%E6%89%B9%E9%87%8F%E6%8B%89%E9%BB%91%E5%BE%AE%E5%8D%9A%E7%82%B9%E8%B5%9E%E7%94%A8%E6%88%B7%20%E8%A7%A3%E9%99%A4%E6%8B%89%E9%BB%91.meta.js
 // ==/UserScript==
 
 (function() {
@@ -110,12 +111,13 @@
             return new Promise(function(resolve, reject) {
                 GM_xmlhttpRequest({
                     method: 'POST',
-                    url: 'https://weibo.com/aj/filter/block?ajwvr=6',
+                    url: 'https://weibo.com/ajax/statuses/filterUser',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'referer': 'https://weibo.com/',
+                        'Content-Type': 'application/json',
+                        'referer': `https://weibo.com/u/${uid}`,
+                        'origin': 'https://weibo.com',
                     },
-                    data: `uid=${uid}&filter_type=1&status=1&interact=1&follow=1&__rnd=${rnd}`,
+                    data: JSON.stringify({ "uid": uid, "status": 1, "interact": 1, "follow": 1, "__rnd": rnd }),
                     onload(res) {
                         resolve(JSON.parse(res.responseText));
                     }
@@ -135,12 +137,13 @@
             return new Promise(function(resolve, reject) {
                 GM_xmlhttpRequest({
                     method: 'POST',
-                    url: 'https://weibo.com/aj/f/delblack?ajwvr=6',
+                    url: 'https://weibo.com/ajax/statuses/deleteFilters',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'referer': 'https://weibo.com/',
+                        'Content-Type': 'application/json',
+                        'referer': `https://weibo.com/u/${uid}`,
+                        'origin': 'https://weibo.com',
                     },
-                    data: `uid=${uid}&objectid=&f=1&__rnd=${rnd}`,
+                    data: JSON.stringify({ "uid": uid, "__rnd": rnd }),
                     onload(res) {
                         resolve(JSON.parse(res.responseText));
                     }
@@ -161,6 +164,8 @@
             const uids = await getLikeData(actionData)
             let failed = [...uids]
 
+
+
             const blockUsers = async function(evt) {
                 const refailed = []
                 link.innerText = `已拉黑 0/${failed.length}`
@@ -171,9 +176,22 @@
                         await sleep(Math.floor(Math.floor((Math.random() * 1000) + 1000)));
                     }
                     const data = await blockUser(failed[i])
-                    if (data.code != '100000') refailed.push(failed[i])
+                    if (data.ok != 1) refailed.push(failed[i])
 
-                    link.innerText = `已拉黑 ${i + 1}/${failed.length}: ${data.msg}`
+                    link.innerText = `已拉黑 ${i + 1}/${failed.length}: ${data.card.desc1} ${data.card.desc2} ${data.card.title_sub}`
+
+                    if (data.card.pic) {
+                        link.style.display = 'flex';
+                        link.style.alignItems = 'center'; // 使文字和图片垂直居中
+                        // 创建图片元素
+                        let image = document.createElement('img');
+                        image.style.width = '16px'; // 设置图片宽度
+                        image.style.height = '16px'; // 设置图片高度
+                        image.style.marginLeft = '5px'; // 设置图片与文字的间距
+                        image.src = data.card.pic;
+                        // 将图片插入到按钮中
+                        link.appendChild(image);
+                    }
                 }
 
                 if (refailed.length > 0) {
@@ -216,9 +234,22 @@
                         await sleep(Math.floor(Math.floor((Math.random() * 1000) + 1000)));
                     }
                     const data = await unblockUser(failed[i])
-                    if (data.code != '100000') refailed.push(failed[i])
+                    if (data.ok != 1) refailed.push(failed[i])
 
-                    link.innerText = `已取消拉黑 ${i + 1}/${failed.length}: ${data.msg}`
+                    link.innerText = `已取消拉黑 ${i + 1}/${failed.length}: ${data.card.title_sub}`
+
+                    if (data.card.pic) {
+                        link.style.display = 'flex';
+                        link.style.alignItems = 'center'; // 使文字和图片垂直居中
+                        // 创建图片元素
+                        let image = document.createElement('img');
+                        image.style.width = '16px'; // 设置图片宽度
+                        image.style.height = '16px'; // 设置图片高度
+                        image.style.marginLeft = '5px'; // 设置图片与文字的间距
+                        image.src = data.card.pic;
+                        // 将图片插入到按钮中
+                        link.appendChild(image);
+                    }
                 }
 
                 if (refailed.length > 0) {
@@ -248,6 +279,7 @@
         blockCommentUserButton.style.border = 'none';
         blockCommentUserButton.style.borderRadius = '4px';
         blockCommentUserButton.style.cursor = 'pointer';
+        blockCommentUserButton.style.marginTop = '10px'; // 设置容器与上方元素的间距
 
         // 创建“拉黑点赞用户”按钮
         const blockLikeUserButton = document.createElement('button');
@@ -259,6 +291,7 @@
         blockLikeUserButton.style.border = 'none';
         blockLikeUserButton.style.borderRadius = '4px';
         blockLikeUserButton.style.cursor = 'pointer';
+        blockLikeUserButton.style.marginTop = '10px'; // 设置容器与上方元素的间距
 
         // 创建“解除拉黑点赞用户”按钮
         const unblockLikeUserButton = document.createElement('button');
@@ -270,6 +303,7 @@
         unblockLikeUserButton.style.border = 'none';
         unblockLikeUserButton.style.borderRadius = '4px';
         unblockLikeUserButton.style.cursor = 'pointer';
+        unblockLikeUserButton.style.marginTop = '10px'; // 设置容器与上方元素的间距
 
         // 将按钮插入到report元素后面
         reportElement.parentNode.insertBefore(blockCommentUserButton, reportElement.nextSibling);
@@ -293,12 +327,25 @@
                 alert(`拉黑评论用户：uid = ${rUid}`);
                 // 在这里添加拉黑评论用户的逻辑
                 const data = await blockUser(rUid)
-                if (data.code != '100000') {
+                if (data.ok != 1) {
                     alert('拉黑失败，请重试。');
                 } else {
                     this.onclick = undefined
-                    this.innerText = '已拉黑'
+                    this.innerText = '已拉黑 ' + data.card.title_sub
                     this.style.color = '#CCC'
+                    if (data.card.pic) {
+                        this.style.display = 'flex';
+                        this.style.alignItems = 'center'; // 使文字和图片垂直居中
+                        // 创建图片元素
+                        const image = document.createElement('img');
+                        image.src = data.card.pic; // 替换为你的图片URL
+                        image.style.width = '16px'; // 设置图片宽度
+                        image.style.height = '16px'; // 设置图片高度
+                        image.style.marginLeft = '5px'; // 设置图片与文字的间距
+
+                        // 将图片插入到按钮中
+                        this.appendChild(image);
+                    }
                 }
             } else {
                 alert('未找到用户id参数');
